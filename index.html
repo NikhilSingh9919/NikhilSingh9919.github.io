@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Part Payment Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load JS file here -->
+    <script defer src="script.js"></script>
+</head>
+
+<body class="bg-slate-100 text-slate-800">
+    <main class="max-w-screen-md mx-auto p-6">
+
+        <!-- Header -->
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold mb-2">Part Payment Calculator</h1>
+            <p class="text-gray-600">Calculate how much interest and tenure you can save with part payments</p>
+        </header>
+
+        <!-- Form -->
+        <section class="bg-white shadow-md rounded-xl p-6 mb-8">
+            <form id="partPaymentForm" class="space-y-6">
+
+                <!-- Monthly EMI -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Monthly EMI</label>
+                    <input type="number" name="emi" class="w-full p-3 border rounded-lg" placeholder="e.g. 15000" required>
+                </div>
+
+                <!-- Interest Rate -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Interest Rate (Annual %)</label>
+                    <input type="number" step="0.01" name="interestRate" class="w-full p-3 border rounded-lg" placeholder="e.g. 8.5" required>
+                </div>
+
+                <!-- Tenure -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Tenure (Months)</label>
+                    <input type="number" name="tenure" class="w-full p-3 border rounded-lg" placeholder="e.g. 120" required>
+                </div>
+
+                <!-- Part Payment Type -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Part Payment Type</label>
+                    <div class="flex gap-4 mt-2">
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="paymentType" value="monthly" checked>
+                            <span>Monthly</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="paymentType" value="one-time">
+                            <span>One Time</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Part Payment Amount -->
+                <div>
+                    <label class="block text-sm font-medium mb-1">Part Payment Amount</label>
+                    <input type="number" name="partPaymentAmount" class="w-full p-3 border rounded-lg" placeholder="e.g. 50000" required>
+                </div>
+
+                <!-- Calculate Button -->
+                <div>
+                    <button type="button" id="calculateBtn" class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition">Calculate</button>
+                </div>
+
+            </form>
+        </section>
+
+        <!-- Result Section -->
+        <section id="results" class="bg-white shadow-md rounded-xl p-6 hidden">
+            <h2 class="text-2xl font-bold mb-4">Results</h2>
+
+            <div class="space-y-4">
+                <!-- Interest Saved -->
+                <div class="p-4 bg-slate-50 rounded-lg">
+                    <p class="text-gray-700">Interest Saved:</p>
+                    <p class="text-xl font-bold text-green-600" id="interestSaved">--</p>
+                </div>
+
+                <!-- Tenure Saved -->
+                <div class="p-4 bg-slate-50 rounded-lg">
+                    <p class="text-gray-700">Tenure Saved (Months):</p>
+                    <p class="text-xl font-bold text-green-600" id="tenureSaved">--</p>
+                </div>
+
+                <!-- New Total Interest -->
+                <div class="p-4 bg-slate-50 rounded-lg">
+                    <p class="text-gray-700">New Total Interest Payable:</p>
+                    <p class="text-xl font-bold text-blue-600" id="newTotalInterest">--</p>
+                </div>
+
+                <!-- New Tenure -->
+                <div class="p-4 bg-slate-50 rounded-lg">
+                    <p class="text-gray-700">New Tenure (Months):</p>
+                    <p class="text-xl font-bold text-blue-600" id="newTenure">--</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</body>
+
+</html>
