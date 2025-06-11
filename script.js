@@ -66,5 +66,7 @@ document.getElementById('calculateBtn').addEventListener('click', function () {
     document.getElementById('newTenure').innerText = `${withPartPayment.monthsTaken} months`;
 
     // Show results
-    document.getElementById('results').classList.remove('hidden');
+    const resultsEl = document.getElementById("results");
+    resultsEl.classList.remove("hidden", "opacity-0");
+    resultsEl.classList.add("opacity-100");
 });
