@@ -1,70 +1,135 @@
-document.getElementById('calculateBtn').addEventListener('click', function () {
-    const emi = parseFloat(document.querySelector('[name="emi"]').value);
-    const annualRate = parseFloat(document.querySelector('[name="interestRate"]').value);
-    const tenureMonths = parseInt(document.querySelector('[name="tenure"]').value);
-    const partPaymentType = document.querySelector('[name="paymentType"]:checked').value;
-    const partPaymentAmount = parseFloat(document.querySelector('[name="partPaymentAmount"]').value);
+// Common loan simulation function
+function simulateLoan(principal, emi, monthlyRate, applyPartPayment, type, partPaymentAmount) {
+    let currentPrincipal = principal;
+    let month = 0;
+    let totalInterest = 0;
+    const schedule = [];
 
-    const monthlyRate = annualRate / 12 / 100;
-
-    // Calculate initial principal from EMI formula:
-    const P = (emi / monthlyRate) * (1 - Math.pow(1 + monthlyRate, -tenureMonths));
-
-    // Function to simulate loan and return { totalInterest, monthsTaken }
-    function simulateLoan(principal, applyPartPayment, type) {
-        let currentPrincipal = principal;
-        let month = 0;
-        let totalInterest = 0;
-
-        while (currentPrincipal > 0) {
-            // Apply part payment first
-            if (applyPartPayment) {
-                if (type === 'one-time' && month === 0) {
-                    currentPrincipal -= partPaymentAmount;
-                    if (currentPrincipal < 0) currentPrincipal = 0;
-                } else if (type === 'monthly') {
-                    currentPrincipal -= partPaymentAmount;
-                    if (currentPrincipal < 0) currentPrincipal = 0;
-                }
+    while (currentPrincipal > 0 && month < 1000) {
+        let part = 0;
+        if (applyPartPayment) {
+            if (type === 'one-time' && month === 0) {
+                part = Math.min(partPaymentAmount, currentPrincipal);
+                currentPrincipal -= part;
+            } else if (type === 'monthly') {
+                part = Math.min(partPaymentAmount, currentPrincipal);
+                currentPrincipal -= part;
             }
-
-            // Recompute interest AFTER part payment
-            const interest = currentPrincipal * monthlyRate;
-            totalInterest += interest;
-
-            // Pay EMI (interest + principal repayment)
-            const principalRepayment = emi - interest;
-            currentPrincipal -= principalRepayment;
-            if (currentPrincipal < 0) currentPrincipal = 0;
-
-            month++;
-
-            // Safety limit
-            if (month > 1000) break;
         }
 
-        return {
-            totalInterest,
-            monthsTaken: month
-        };
+        const interest = currentPrincipal * monthlyRate;
+        totalInterest += interest;
+        let principalRepayment = emi - interest;
+        if (principalRepayment > currentPrincipal) principalRepayment = currentPrincipal;
+        currentPrincipal -= principalRepayment;
+
+        month++;
+        schedule.push({
+            month,
+            interest,
+            principal: principalRepayment,
+            partPayment: part,
+            balance: currentPrincipal < 0 ? 0 : currentPrincipal
+        });
     }
 
-    // Simulate baseline (no part payment)
-    const baseline = simulateLoan(P, false, null);
+    return { totalInterest, monthsTaken: month, schedule };
+}
 
-    // Simulate with part payment
-    const withPartPayment = simulateLoan(P, true, partPaymentType);
-
-    // Calculate savings
-    const interestSaved = baseline.totalInterest - withPartPayment.totalInterest;
-    const tenureSaved = baseline.monthsTaken - withPartPayment.monthsTaken;
-
-    // Update UI
-    document.getElementById('interestSaved').innerText = `₹ ${interestSaved.toFixed(2)}`;
-    document.getElementById('tenureSaved').innerText = `${tenureSaved} months`;
-    document.getElementById('newTotalInterest').innerText = `₹ ${withPartPayment.totalInterest.toFixed(2)}`;
-    document.getElementById('newTenure').innerText = `${withPartPayment.monthsTaken} months`;
-
-    // Show results
-    document.getElementById('results').classList.remove('hidden');
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tab = btn.getAttribute('data-tab');
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById(tab + 'Tab').classList.remove('hidden');
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('border-blue-600', 'text-blue-600'));
+        btn.classList.add('border-blue-600', 'text-blue-600');
+    });
 });
+
+// Simple mode calculation
+const simpleBtn = document.getElementById('simpleCalculateBtn');
+if (simpleBtn) {
+    simpleBtn.addEventListener('click', () => {
+        const form = document.getElementById('simpleForm');
+        const emi = parseFloat(form.querySelector('[name="emi"]').value);
+        const annualRate = parseFloat(form.querySelector('[name="interestRate"]').value);
+        const tenureMonths = parseInt(form.querySelector('[name="tenure"]').value);
+        const partPaymentType = form.querySelector('[name="paymentType"]:checked').value;
+        const partPaymentAmount = parseFloat(form.querySelector('[name="partPaymentAmount"]').value);
+
+        const monthlyRate = annualRate / 12 / 100;
+        const principal = (emi / monthlyRate) * (1 - Math.pow(1 + monthlyRate, -tenureMonths));
+
+        const baseline = simulateLoan(principal, emi, monthlyRate, false, null, 0);
+        const withPart = simulateLoan(principal, emi, monthlyRate, true, partPaymentType, partPaymentAmount);
+
+        const interestSaved = baseline.totalInterest - withPart.totalInterest;
+        const tenureSaved = baseline.monthsTaken - withPart.monthsTaken;
+
+        document.getElementById('interestSaved').innerText = `₹ ${interestSaved.toFixed(2)}`;
+        document.getElementById('tenureSaved').innerText = `${tenureSaved} months`;
+        document.getElementById('newTotalInterest').innerText = `₹ ${withPart.totalInterest.toFixed(2)}`;
+        document.getElementById('newTenure').innerText = `${withPart.monthsTaken} months`;
+
+        const resEl = document.getElementById('simpleResults');
+        resEl.classList.remove('hidden', 'opacity-0');
+        resEl.classList.add('opacity-100');
+    });
+}
+
+// Advanced mode calculation
+const advBtn = document.getElementById('advancedCalculateBtn');
+if (advBtn) {
+    advBtn.addEventListener('click', () => {
+        const form = document.getElementById('advancedForm');
+        const loanAmount = parseFloat(form.querySelector('[name="loanAmount"]').value);
+        const annualRate = parseFloat(form.querySelector('[name="interestRate"]').value);
+        const tenureMonths = parseInt(form.querySelector('[name="tenure"]').value);
+        const partPaymentType = form.querySelector('[name="paymentType"]:checked').value;
+        const partPaymentAmount = parseFloat(form.querySelector('[name="partPaymentAmount"]').value);
+
+        const monthlyRate = annualRate / 12 / 100;
+        const emi = loanAmount * monthlyRate * Math.pow(1 + monthlyRate, tenureMonths) / (Math.pow(1 + monthlyRate, tenureMonths) - 1);
+
+        const baseline = simulateLoan(loanAmount, emi, monthlyRate, false, null, 0);
+        const withPart = simulateLoan(loanAmount, emi, monthlyRate, true, partPaymentType, partPaymentAmount);
+
+        const interestSaved = baseline.totalInterest - withPart.totalInterest;
+        const tenureSaved = baseline.monthsTaken - withPart.monthsTaken;
+        const totalPayable = loanAmount + withPart.totalInterest;
+
+        document.getElementById('advRemainingTenure').innerText = `${withPart.monthsTaken} months`;
+        document.getElementById('advTenureSaved').innerText = `${tenureSaved} months`;
+        document.getElementById('advAmountPayable').innerText = `₹ ${totalPayable.toFixed(2)}`;
+        document.getElementById('advInterestSaved').innerText = `₹ ${interestSaved.toFixed(2)}`;
+
+        const body = document.getElementById('scheduleBody');
+        body.innerHTML = '';
+        withPart.schedule.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td class="border px-2">${row.month}</td>` +
+                           `<td class="border px-2">${row.interest.toFixed(2)}</td>` +
+                           `<td class="border px-2">${row.principal.toFixed(2)}</td>` +
+                           `<td class="border px-2">${row.partPayment.toFixed(2)}</td>` +
+                           `<td class="border px-2">${row.balance.toFixed(2)}</td>`;
+            body.appendChild(tr);
+        });
+
+        const resEl = document.getElementById('advancedResults');
+        resEl.classList.remove('hidden', 'opacity-0');
+        resEl.classList.add('opacity-100');
+    });
+}
+
+// PDF Download
+const pdfBtn = document.getElementById('downloadPdfBtn');
+if (pdfBtn) {
+    pdfBtn.addEventListener('click', () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text('Payment Schedule', 10, 10);
+        doc.autoTable({ html: '#scheduleTable', startY: 20 });
+        doc.save('payment_schedule.pdf');
+    });
+}
