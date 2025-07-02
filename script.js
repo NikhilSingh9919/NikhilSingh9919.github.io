@@ -67,10 +67,13 @@ if (simpleBtn) {
         const interestSaved = baseline.totalInterest - withPart.totalInterest;
         const tenureSaved = baseline.monthsTaken - withPart.monthsTaken;
 
+        const savedYears = tenureSaved / 12;
+        const newTenureYears = withPart.monthsTaken / 12;
+
         document.getElementById('interestSaved').innerText = `₹ ${interestSaved.toFixed(2)}`;
-        document.getElementById('tenureSaved').innerText = `${tenureSaved} months`;
+        document.getElementById('tenureSaved').innerText = `${tenureSaved} months (${savedYears.toFixed(1)} years)`;
         document.getElementById('newTotalInterest').innerText = `₹ ${withPart.totalInterest.toFixed(2)}`;
-        document.getElementById('newTenure').innerText = `${withPart.monthsTaken} months`;
+        document.getElementById('newTenure').innerText = `${withPart.monthsTaken} months (${newTenureYears.toFixed(1)} years)`;
 
         const resEl = document.getElementById('simpleResults');
         resEl.classList.remove('hidden', 'opacity-0');
@@ -99,8 +102,11 @@ if (advBtn) {
         const tenureSaved = baseline.monthsTaken - withPart.monthsTaken;
         const totalPayable = loanAmount + withPart.totalInterest;
 
-        document.getElementById('advRemainingTenure').innerText = `${withPart.monthsTaken} months`;
-        document.getElementById('advTenureSaved').innerText = `${tenureSaved} months`;
+        const remainingYears = withPart.monthsTaken / 12;
+        const savedYears = tenureSaved / 12;
+
+        document.getElementById('advRemainingTenure').innerText = `${withPart.monthsTaken} months (${remainingYears.toFixed(1)} years)`;
+        document.getElementById('advTenureSaved').innerText = `${tenureSaved} months (${savedYears.toFixed(1)} years)`;
         document.getElementById('advAmountPayable').innerText = `₹ ${totalPayable.toFixed(2)}`;
         document.getElementById('advInterestSaved').innerText = `₹ ${interestSaved.toFixed(2)}`;
 
