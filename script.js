@@ -36,6 +36,17 @@ function simulateLoan(principal, emi, monthlyRate, applyPartPayment, type, partP
     return { totalInterest, monthsTaken: month, schedule };
 }
 
+function formatYearsMonths(months) {
+    const years = Math.floor(months / 12);
+    const remaining = months % 12;
+    if (years && remaining) {
+        return `${years} year${years > 1 ? 's' : ''} ${remaining} month${remaining > 1 ? 's' : ''}`;
+    } else if (years) {
+        return `${years} year${years > 1 ? 's' : ''}`;
+    }
+    return `${remaining} month${remaining !== 1 ? 's' : ''}`;
+}
+
 // Tab switching
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -67,13 +78,10 @@ if (simpleBtn) {
         const interestSaved = baseline.totalInterest - withPart.totalInterest;
         const tenureSaved = baseline.monthsTaken - withPart.monthsTaken;
 
-        const savedYears = tenureSaved / 12;
-        const newTenureYears = withPart.monthsTaken / 12;
-
         document.getElementById('interestSaved').innerText = `₹ ${interestSaved.toFixed(2)}`;
-        document.getElementById('tenureSaved').innerText = `${tenureSaved} months (${savedYears.toFixed(1)} years)`;
+        document.getElementById('tenureSaved').innerText = `${tenureSaved} months (${formatYearsMonths(tenureSaved)})`;
         document.getElementById('newTotalInterest').innerText = `₹ ${withPart.totalInterest.toFixed(2)}`;
-        document.getElementById('newTenure').innerText = `${withPart.monthsTaken} months (${newTenureYears.toFixed(1)} years)`;
+        document.getElementById('newTenure').innerText = `${withPart.monthsTaken} months (${formatYearsMonths(withPart.monthsTaken)})`;
 
         const resEl = document.getElementById('simpleResults');
         resEl.classList.remove('hidden', 'opacity-0');
@@ -102,11 +110,8 @@ if (advBtn) {
         const tenureSaved = baseline.monthsTaken - withPart.monthsTaken;
         const totalPayable = loanAmount + withPart.totalInterest;
 
-        const remainingYears = withPart.monthsTaken / 12;
-        const savedYears = tenureSaved / 12;
-
-        document.getElementById('advRemainingTenure').innerText = `${withPart.monthsTaken} months (${remainingYears.toFixed(1)} years)`;
-        document.getElementById('advTenureSaved').innerText = `${tenureSaved} months (${savedYears.toFixed(1)} years)`;
+        document.getElementById('advRemainingTenure').innerText = `${withPart.monthsTaken} months (${formatYearsMonths(withPart.monthsTaken)})`;
+        document.getElementById('advTenureSaved').innerText = `${tenureSaved} months (${formatYearsMonths(tenureSaved)})`;
         document.getElementById('advAmountPayable').innerText = `₹ ${totalPayable.toFixed(2)}`;
         document.getElementById('advInterestSaved').innerText = `₹ ${interestSaved.toFixed(2)}`;
 
